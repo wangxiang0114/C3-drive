@@ -24,6 +24,8 @@ When all slots are occupied, C3-Drive ranks adapter pairs by the difference in t
 
 The figure illustrates four perturbations against a clean reference: camera stream disruption, partial observation, GPS localization noise, and ego-speed estimation noise. Use `camera-drop`, `occlusion`, `gps`, and `speed` with the collection and evaluation commands below.
 
+For a full experiment, [run the sequential benchmark](docs/experiments.md) to produce a stage-by-domain score matrix, forgetting and backward-transfer metrics, and a record of each deployment decision. The same guide shows how to evaluate the drift detector offline.
+
 ## 1. Installation
 
 Use Python 3.12 and CARLA 0.9.16 with a matching Python wheel. Use a dedicated CARLA instance for collection, adaptation, and closed-loop evaluation. Offline training and calibration can run with CARLA shut down. PyTorch supports both CPU and CUDA.
@@ -137,3 +139,6 @@ Closed-loop evaluation reports per-route results, completion, collision and succ
 | [`c3drive/evaluate.py`](c3drive/evaluate.py) | Offline planning metrics and per-episode adapter routing |
 | [`c3drive/detector.py`](c3drive/detector.py) | Distribution fitting, block calibration, and drift detection |
 | [`c3drive/adapt.py`](c3drive/adapt.py) | Dual-anchor training, consolidation, replay, and deployment gate |
+| [`c3drive/benchmark.py`](c3drive/benchmark.py) | Sequential deployment, resume, paired test evaluations, and resource accounting |
+| [`c3drive/drift_eval.py`](c3drive/drift_eval.py) | Per-episode drift traces and held-out detector evaluation |
+| [`c3drive/reporting.py`](c3drive/reporting.py) | Score matrices, retention metrics, and atomic reports |

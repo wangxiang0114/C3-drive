@@ -18,16 +18,17 @@ def distances(features, profile):
 
 
 @torch.inference_mode()
-def blocks(model, paths, block_size, batch_size):
+def episode_blocks(model, path, block_size, batch_size):
     device = next(model.parameters()).device
-    result = []
-    for path in paths:
-        features = [model.encode(*[value.to(device) for value in observations(batch)]).cpu().numpy()
-                    for batch in loader([path], batch_size)]
-        vectors = np.concatenate(features)
-        count = len(vectors) // block_size
-        if count:
-            result.append(vectors[:count * block_size].reshape(count, block_size, -1).mean(axis=1))
+    features = [model.encode(*[value.to(device) for value in observations(batch)]).cpu().numpy()
+                for batch in loader([path], batch_size)]
+    vectors = np.concatenate(features)
+    count = len(vectors) // block_size
+    return vectors[:count * block_size].reshape(count, block_size, vectors.shape[-1]).mean(axis=1)
+
+
+def blocks(model, paths, block_size, batch_size):
+    result = [block for path in paths if len(block := episode_blocks(model, path, block_size, batch_size))]
     if not result:
         raise ValueError("No complete detector blocks. Increase recording length or reduce block size.")
     return result

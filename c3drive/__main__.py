@@ -4,6 +4,7 @@ import math
 from pathlib import Path
 
 from .data import DOMAINS, SPLITS
+from .reporting import write_json
 
 
 def positive(value):
@@ -54,6 +55,21 @@ def evaluation(parser, split):
     parser.set_defaults(split=split)
 
 
+def adaptation(parser):
+    simulation(parser)
+    learning(parser)
+    parser.add_argument("--checkpoint", type=Path, required=True)
+    parser.add_argument("--teacher", type=Path, required=True)
+    parser.add_argument("--steps", type=positive, default=300)
+    parser.add_argument("--candidates", type=positive, default=1024)
+    parser.add_argument("--lr", type=positive_float, default=1e-3)
+    parser.add_argument("--seed", type=int, default=41)
+    parser.add_argument("--min-gain", type=float, default=0.02)
+    parser.add_argument("--max-score-drop", type=float, default=0.03)
+    parser.add_argument("--max-completion-drop", type=float, default=0.03)
+    parser.add_argument("--max-collision-increase", type=float, default=0.05)
+
+
 def command_parser():
     parser = argparse.ArgumentParser(description="Train and evaluate C3-Drive from scratch.")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -96,29 +112,26 @@ def command_parser():
     init.add_argument("--memory-budget", type=positive, default=256)
 
     update = sub.add_parser("adapt", help="Detect a shift, train a candidate and apply the closed-loop gate")
-    simulation(update)
-    learning(update)
-    update.add_argument("--checkpoint", type=Path, required=True)
-    update.add_argument("--teacher", type=Path, required=True)
+    adaptation(update)
     update.add_argument("--domain", choices=DOMAINS[1:-1], required=True)
     update.add_argument("--report", type=Path, required=True)
-    update.add_argument("--steps", type=positive, default=300)
-    update.add_argument("--candidates", type=positive, default=1024)
-    update.add_argument("--lr", type=positive_float, default=1e-3)
-    update.add_argument("--seed", type=int, default=41)
-    update.add_argument("--min-gain", type=float, default=0.02)
-    update.add_argument("--max-score-drop", type=float, default=0.03)
-    update.add_argument("--max-completion-drop", type=float, default=0.03)
-    update.add_argument("--max-collision-increase", type=float, default=0.05)
+
+    benchmark = sub.add_parser("benchmark", help="Run and report a sequence of closed-loop deployment shifts")
+    adaptation(benchmark)
+    benchmark.add_argument("--domains", nargs="+", choices=DOMAINS[1:-1], default=list(DOMAINS[1:-1]),
+                           help="Domain arrival order after the clean baseline")
+    benchmark.add_argument("--resume", action="store_true", help="Continue from the last completed benchmark stage")
+
+    drift = sub.add_parser("detect-eval", help="Measure detection and false alarms on held-out recordings")
+    learning(drift)
+    drift.add_argument("--checkpoint", type=Path, required=True)
+    drift.add_argument("--domains", nargs="+", choices=DOMAINS[1:-1], default=list(DOMAINS[1:-1]),
+                       help="Shifted domains to compare with clean test recordings")
+    drift.add_argument("--limit", type=positive, help="Use at most this many test recordings per domain")
 
     evaluation(sub.add_parser("validate", help="Evaluate a checkpoint on validation data or routes"), "validation")
     evaluation(sub.add_parser("test", help="Evaluate a frozen checkpoint on the held-out test split"), "test")
     return parser
-
-
-def write_json(path, value):
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text(json.dumps(value, indent=2, allow_nan=False) + "\n", encoding="utf-8")
 
 
 def collect(env, manifest, args):
@@ -198,6 +211,11 @@ def main():
 
         initialize(args)
         return
+    if args.command == "detect-eval":
+        from .drift_eval import run_drift_evaluation
+
+        run_drift_evaluation(args)
+        return
     if args.command in ("validate", "test") and args.mode == "offline":
         run_evaluation(args)
         return
@@ -211,6 +229,11 @@ def main():
         print(args.output)
         return
     manifest = read_manifest(args.manifest)
+    if args.command == "benchmark":
+        from .benchmark import run_benchmark
+
+        run_benchmark(args, manifest, connect)
+        return
     if args.limit and any(args.limit > len(routes) for routes in manifest["routes"].values()):
         parser.error("--limit exceeds the number of routes in the manifest.")
     env = connect(args, manifest["town"])

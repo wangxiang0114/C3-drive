@@ -1,8 +1,28 @@
 # C3-Drive
 
-**Compact Continual Closed-Loop Adaptation for End-to-End Driving under Deployment Distribution Shifts**
+**Fixed-capacity continual adaptation for closed-loop end-to-end driving in CARLA**
 
-C3-Drive learns to predict future waypoints and target speed from CARLA RGB cameras, LiDAR, vehicle speed, and route guidance. During deployment, a frozen backbone extracts features for drift detection. The system trains and consolidates adapters within a fixed number of slots, then uses separate closed-loop routes to decide whether to deploy candidate weights.
+C3-Drive predicts future waypoints and target speed from RGB cameras, LiDAR, vehicle speed, and route guidance. It detects sustained changes in observations and adapts the planner within a fixed number of adapter slots and a bounded replay memory. A candidate checkpoint replaces the current one only after closed-loop checks on separate routes.
+
+This repository includes route generation, expert data collection, teacher and student training, drift calibration, continual adaptation, and held-out evaluation. The commands below run the released CARLA workflow with self-collected data.
+
+## How it works
+
+![C3-Drive overview showing online planning, drift detection, isolated adaptation, and deployment checks](docs/figures/c3-drive-overview.png)
+
+A frozen backbone supplies features for sequential drift detection. When the detector triggers, the system trains a candidate using new-domain data and replay from accepted domains. The deployment gate checks for gains on the new domain and bounds regressions on historical domains.
+
+### Reusing adapter slots
+
+![Adapter consolidation workflow showing shared probes, pair ranking, distillation, and historical regression checks](docs/figures/adapter-consolidation.png)
+
+When all slots are occupied, C3-Drive ranks adapter pairs by the difference in their planning outputs on shared replay examples. A merge frees a slot only after the merged adapter passes closed-loop regression checks on its source domains. The newly trained policy then faces its own deployment checks.
+
+### Deployment shifts in CARLA
+
+![CARLA examples of clean driving, camera stream disruption, partial observation, GPS noise, and speed estimation noise](docs/figures/carla-deployment-shifts.png)
+
+The figure illustrates four perturbations against a clean reference: camera stream disruption, partial observation, GPS localization noise, and ego-speed estimation noise. Use `camera-drop`, `occlusion`, `gps`, and `speed` with the collection and evaluation commands below.
 
 ## 1. Installation
 

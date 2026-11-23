@@ -1,0 +1,208 @@
+{
+  "canonical_gate_denominators": {
+    "all_completed_proposals": 110,
+    "all_commits": 92,
+    "saturated_completed_proposals": 57,
+    "committed_merges": 44
+  },
+  "run1_event_trace": {
+    "coupled": {
+      "run": 1,
+      "max_evidence_ratio_first_shift": 3.3244563455147804,
+      "events": [
+        {
+          "trigger": 66,
+          "candidate_ready": 74,
+          "validation_state_start": 76,
+          "final_gate_and_commit_decision": 78,
+          "committed": true,
+          "model_before": "69ef671288cc32843370",
+          "model_after": "b5977d372e8abaf36557"
+        }
+      ]
+    },
+    "appearance": {
+      "run": 1,
+      "max_evidence_ratio_first_shift": 3.985553129601351,
+      "events": [
+        {
+          "trigger": 66,
+          "candidate_ready": 74,
+          "validation_state_start": 76,
+          "final_gate_and_commit_decision": 78,
+          "committed": false,
+          "model_before": "69ef671288cc32843370",
+          "model_after": "69ef671288cc32843370"
+        },
+        {
+          "trigger": 87,
+          "candidate_ready": 95,
+          "validation_state_start": 97,
+          "final_gate_and_commit_decision": 99,
+          "committed": false,
+          "model_before": "69ef671288cc32843370",
+          "model_after": "69ef671288cc32843370"
+        },
+        {
+          "trigger": 108,
+          "candidate_ready": 116,
+          "validation_state_start": 118,
+          "final_gate_and_commit_decision": 120,
+          "committed": false,
+          "model_before": "69ef671288cc32843370",
+          "model_after": "69ef671288cc32843370"
+        }
+      ]
+    },
+    "hidden": {
+      "run": 1,
+      "max_evidence_ratio_first_shift": 0.9224564567877809,
+      "events": []
+    },
+    "gradual": {
+      "run": 1,
+      "max_evidence_ratio_first_shift": 2.968960798709859,
+      "events": [
+        {
+          "trigger": 82,
+          "candidate_ready": 90,
+          "validation_state_start": 92,
+          "final_gate_and_commit_decision": 94,
+          "committed": true,
+          "model_before": "69ef671288cc32843370",
+          "model_after": "11683d19d83bda15bcf8"
+        }
+      ]
+    }
+  },
+  "canonical_phase_counts_30runs": [
+    {
+      "phase": 1,
+      "domain": 0,
+      "completed_proposals": 0,
+      "commits": 0,
+      "rejections": 0
+    },
+    {
+      "phase": 2,
+      "domain": 1,
+      "completed_proposals": 30,
+      "commits": 30,
+      "rejections": 0
+    },
+    {
+      "phase": 3,
+      "domain": 2,
+      "completed_proposals": 32,
+      "commits": 30,
+      "rejections": 2
+    },
+    {
+      "phase": 4,
+      "domain": 3,
+      "completed_proposals": 34,
+      "commits": 29,
+      "rejections": 5
+    },
+    {
+      "phase": 5,
+      "domain": 4,
+      "completed_proposals": 30,
+      "commits": 30,
+      "rejections": 0
+    },
+    {
+      "phase": 6,
+      "domain": 5,
+      "completed_proposals": 30,
+      "commits": 30,
+      "rejections": 0
+    },
+    {
+      "phase": 7,
+      "domain": 6,
+      "completed_proposals": 32,
+      "commits": 30,
+      "rejections": 2
+    },
+    {
+      "phase": 8,
+      "domain": 7,
+      "completed_proposals": 31,
+      "commits": 30,
+      "rejections": 1
+    },
+    {
+      "phase": 9,
+      "domain": 8,
+      "completed_proposals": 43,
+      "commits": 26,
+      "rejections": 17
+    },
+    {
+      "phase": 10,
+      "domain": 2,
+      "completed_proposals": 1,
+      "commits": 0,
+      "rejections": 1
+    },
+    {
+      "phase": 11,
+      "domain": 0,
+      "completed_proposals": 0,
+      "commits": 0,
+      "rejections": 0
+    },
+    {
+      "phase": 12,
+      "domain": 5,
+      "completed_proposals": 0,
+      "commits": 0,
+      "rejections": 0
+    }
+  ],
+  "selection_summary": {
+    "full": {
+      "pool_C1_fraction": 0.0,
+      "selected_C1_fraction": 0.0,
+      "pool_severity_positive_fraction": 0.2601425438596491,
+      "selected_severity_positive_fraction": 0.5812500000000002,
+      "pool_risk_positive_fraction": 0.08543494152046782,
+      "selected_risk_positive_fraction": 0.19479166666666667,
+      "selected_current_fraction": 0.31645833333333334,
+      "mean_nearest_selected_squared_distance": 0.04194038073933807
+    },
+    "random_memory": {
+      "pool_C1_fraction": 0.0,
+      "selected_C1_fraction": 0.0,
+      "pool_severity_positive_fraction": 0.2601425438596491,
+      "selected_severity_positive_fraction": 0.2602083333333333,
+      "pool_risk_positive_fraction": 0.08543494152046782,
+      "selected_risk_positive_fraction": 0.09270833333333334,
+      "selected_current_fraction": 0.5514583333333335,
+      "mean_nearest_selected_squared_distance": 0.03725092161593487
+    },
+    "coverage_only": {
+      "pool_C1_fraction": 0.0,
+      "selected_C1_fraction": 0.0,
+      "pool_severity_positive_fraction": 0.2601425438596491,
+      "selected_severity_positive_fraction": 0.21625000000000003,
+      "pool_risk_positive_fraction": 0.08543494152046782,
+      "selected_risk_positive_fraction": 0.165,
+      "selected_current_fraction": 0.23541666666666664,
+      "mean_nearest_selected_squared_distance": 0.028882974113053936
+    },
+    "pareto_only": {
+      "pool_C1_fraction": 0.0,
+      "selected_C1_fraction": 0.0,
+      "pool_severity_positive_fraction": 0.2601425438596491,
+      "selected_severity_positive_fraction": 0.5812500000000002,
+      "pool_risk_positive_fraction": 0.08543494152046782,
+      "selected_risk_positive_fraction": 0.19479166666666667,
+      "selected_current_fraction": 0.42999999999999994,
+      "mean_nearest_selected_squared_distance": 0.04432330879434516
+    }
+  },
+  "all_gate_clause_checks_pass": true,
+  "reference_critical_events": 0
+}

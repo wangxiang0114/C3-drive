@@ -6,6 +6,12 @@ C3-Drive predicts future waypoints and target speed from RGB cameras, LiDAR, veh
 
 This repository includes route generation, expert data collection, teacher and student training, drift calibration, continual adaptation, and held-out evaluation. The commands below run the released CARLA workflow with self-collected data.
 
+## Reproducibility
+
+- [Manuscript protocol and official result checks](docs/reproducibility.md) document the CARLA 0.9.15 and Bench2Drive v0.0.4 setup, the runnable checks, and the original experiment artifacts still needed to reproduce the reported Driving Scores.
+- [Synthetic mechanism experiments](docs/reproducibility.md#synthetic-mechanism-experiments) regenerate archived closed-loop mechanism plots and recompute selected manuscript statistics from recorded proposals.
+- The installation and training commands below run the public CARLA 0.9.16 workflow with self-collected data and a lightweight CNN–GRU planner. Use its local scores to evaluate that workflow.
+
 ## How it works
 
 ![C3-Drive overview showing online planning, drift detection, isolated adaptation, and deployment checks](docs/figures/c3-drive-overview.png)
@@ -24,7 +30,7 @@ When all slots are occupied, C3-Drive ranks adapter pairs by the difference in t
 
 The figure illustrates four perturbations against a clean reference: camera stream disruption, partial observation, GPS localization noise, and ego-speed estimation noise. Use `camera-drop`, `occlusion`, `gps`, and `speed` with the collection and evaluation commands below.
 
-For a full experiment, [run the sequential benchmark](docs/experiments.md) to produce a stage-by-domain score matrix, forgetting and backward-transfer metrics, and a record of each deployment decision. The same guide shows how to evaluate the drift detector offline.
+For an end-to-end run of the public reference implementation, [run the sequential benchmark](docs/experiments.md) to produce a stage-by-domain score matrix, forgetting and backward-transfer metrics, and a record of each deployment decision. The same guide shows how to evaluate the drift detector offline.
 
 ## 1. Installation
 

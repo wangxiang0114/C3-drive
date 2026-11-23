@@ -1,0 +1,42 @@
+{
+  "status": "PASS",
+  "candidate_pairs": 72,
+  "independently_replayed_pairs": 72,
+  "seeds": 12,
+  "functional_mean_drop": 0.007285097263443091,
+  "uniform_pair_expectation_mean_drop": 0.016752455287972545,
+  "paired_difference_mean": -0.009467358024529455,
+  "paired_bootstrap95": [
+    -0.011327372622037764,
+    -0.007549025967771124
+  ],
+  "functional": [
+    0.00733706356376107,
+    0.001148710088978433,
+    0.007672403213035972,
+    0.005326053472134218,
+    0.035325139699443286,
+    0.0008646896569068918,
+    0.005817015644784873,
+    0.007185205188258825,
+    0.00796130923690097,
+    0.0026570966885682834,
+    0.0035439081024706276,
+    0.002582572606073641
+  ],
+  "uniform_expectation": [
+    0.01311877520608947,
+    0.01195133551730515,
+    0.013245093367408903,
+    0.01168523487827274,
+    0.047014937869463036,
+    0.015259895574643023,
+    0.008861426407442308,
+    0.01851595201752367,
+    0.021071181065565603,
+    0.010820113647914761,
+    0.014612975136692186,
+    0.014872542767349709
+  ],
+  "scope": "One proposal per feasible pair at the same old model, current samples, replay and independent audit episodes. Uniform expectation averages every feasible pair; no search over test performance. No claim of ACMap or SEMA reproduction."
+}

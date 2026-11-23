@@ -1,6 +1,6 @@
 # Experiment workflows
 
-The repository implements the paper's evaluation protocol using the local CARLA collector and route score described in the [README](../README.md#6-test-on-held-out-routes). The reported numbers come from your run. They use the repository's CARLA setup and scoring definition, which differ from the paper's Bench2Drive experiment.
+These workflows run the public CARLA 0.9.16 reference implementation on self-collected routes and use the [local route score](../README.md#6-test-on-held-out-routes). See the [manuscript reproducibility guide](reproducibility.md) for the Bench2Drive evaluation setup, official result checking, and synthetic mechanism experiments.
 
 ## Sequential closed-loop benchmark
 

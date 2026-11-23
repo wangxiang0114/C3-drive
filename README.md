@@ -16,11 +16,7 @@ python -m c3drive train-test --data "D:\C3Drive\episodes" --output runs/first-tr
 
 This command audits the data splits, trains the teacher and student, reports their validation metrics, and tests the selected student on held-out episodes. [Input layout, closed-loop testing, and individual commands](docs/experiments.md#train-validate-and-test)
 
-## Reproducibility
-
-- [Manuscript protocol and official result checks](docs/reproducibility.md) document the CARLA 0.9.15 and Bench2Drive v0.0.4 setup, the runnable checks, and the original experiment artifacts still needed to reproduce the reported Driving Scores.
-- [Plotting](docs/reproducibility.md#plotting) describes how to render figures from local input files.
-- The installation and training commands below run the public CARLA 0.9.16 workflow with self-collected data and a lightweight CNN–GRU planner. Use its local scores to evaluate that workflow.
+[Bench2Drive report tools and plotting commands](docs/reproducibility.md)
 
 ## How it works
 
@@ -38,7 +34,7 @@ When all slots are occupied, C3-Drive ranks adapter pairs by the difference in t
 
 Use `camera-drop`, `occlusion`, `gps`, and `speed` to select deployment perturbations in the collection and evaluation commands below.
 
-For an end-to-end run of the public reference implementation, [run the sequential benchmark](docs/experiments.md) to produce a stage-by-domain score matrix, forgetting and backward-transfer metrics, and a record of each deployment decision. The same guide shows how to evaluate the drift detector offline.
+The sequential benchmark writes a stage-by-domain score matrix, forgetting and backward-transfer metrics, and deployment decisions. [Benchmark and detector commands](docs/experiments.md)
 
 ## 1. Installation
 
@@ -139,7 +135,7 @@ python -m c3drive collect --domain clean --splits test
 python -m c3drive test --mode offline --domains clean --checkpoint runs/c3-stage0.pt --output runs/test-offline.json
 ```
 
-Closed-loop evaluation reports per-route results, completion, collision and success rates, and a repository-defined score based on route progress, collisions, and solid-lane crossings. The training workflow uses self-collected CARLA data, a CNN–GRU planner, and the BasicAgent expert. Project organization draws on public driving research repositories. [Bench2Drive](https://github.com/Thinklab-SJTU/Bench2Drive) · [Fail2Drive](https://github.com/autonomousvision/fail2drive)
+Closed-loop evaluation reports per-route results, completion, collision and success rates, and a route score based on progress, collisions, and solid-lane crossings.
 
 ## Source layout
 

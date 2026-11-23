@@ -50,4 +50,4 @@ Each file stores one episode. Arrays are synchronized along the first axis, wher
 
 In the local coordinate frame, positive `x` points forward and positive `y` points right. The loader forms a window from the current frame and the two preceding frames within each episode. At the beginning of an episode, it repeats the first frame as needed. Expert targets must come from the same trajectory. The collector drops observations near the end of each episode when their full future target window is unavailable. In the clean domain, the paired clean fields can match the corresponding deployment fields.
 
-The code uses its own CARLA routes, data format, and scoring. To import data from a public benchmark, align sensor poses, sampling rate, labels, and units with this schema. Offline evaluation uses the labels defined above. Closed-loop scoring uses route progress and events recorded during policy execution.
+When importing recordings, align sensor poses, sampling rate, labels, and units with this schema.

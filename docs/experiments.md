@@ -1,6 +1,6 @@
 # Experiment workflows
 
-These workflows run the public CARLA 0.9.16 reference implementation on self-collected routes and use the [local route score](../README.md#6-test-on-held-out-routes). See the [manuscript reproducibility guide](reproducibility.md) for the Bench2Drive evaluation setup, official result checking, and plotting commands.
+Train from local NPZ episodes and evaluate on held-out recordings or CARLA routes. [Bench2Drive report tools and plotting commands](reproducibility.md)
 
 ## Train, validate, and test
 

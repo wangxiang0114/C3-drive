@@ -44,7 +44,6 @@ def summarize(records):
         gated_gains.append(mean(gain * keep for gain, keep in zip(gains, accepted)))
 
     return {
-        "evidence": "synthetic_tracking_score",
         "runs": len(selected),
         "pair_candidates": len(selected) * 6,
         "pair_mean_worst_historical_loss": {"functional": mean(selected), "uniform": mean(uniform)},

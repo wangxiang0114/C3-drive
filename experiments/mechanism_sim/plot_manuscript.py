@@ -217,4 +217,4 @@ for i,k in enumerate(conds):
 d.axhline(64,color='#555555',ls=':',lw=.6);d.set_ylim(0,72);d.set_xticks(range(4),['Appear.','Weak','Coupled','Gradual']);d.set_ylabel('Restricted time (blocks)');d.legend(loc='upper left',ncol=2,fontsize=5.1);finishax(d);savefig(f,10)
 
 assert before=={p.name: hashlib.sha256(p.read_bytes()).hexdigest() for p in sourcepaths}
-(DEST/'data_and_font_audit.json').write_text(json.dumps({'status':'PASS','new_experiments':0,'unchanged_data_sha256':before,'fonts':fonts},indent=2),encoding='utf-8')
+(DEST/'data_and_font_audit.json').write_text(json.dumps({'status':'PASS','unchanged_data_sha256':before,'fonts':fonts},indent=2),encoding='utf-8')

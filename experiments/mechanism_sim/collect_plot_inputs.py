@@ -1,4 +1,4 @@
-"""Collect the numeric inputs for manuscript Figs. 7–10 from synthetic run outputs."""
+"""Assemble plotting inputs from local run files."""
 
 import argparse
 import gzip

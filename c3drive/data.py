@@ -60,19 +60,31 @@ def check_route(archive, path, domain, split, route_splits):
 
 
 def inspect_dataset(root, domains, splits):
+    return inspect_groups(root, ((domain, split) for domain in domains for split in splits))
+
+
+def inspect_groups(root, groups, manifest=None):
     report = {}
     route_splits = {}
-    for domain in domains:
-        for split in splits:
-            files = []
-            for path in episodes(root, domain, split):
-                with np.load(path, allow_pickle=False) as archive:
-                    count = sample_count(archive, path)
-                    check_route(archive, path, domain, split, route_splits)
-                    read_arrays(archive, path, count)
-                files.append({"file": str(path.relative_to(root)), "samples": count})
-            report[f"{domain}/{split}"] = {"episodes": len(files), "samples": sum(f["samples"] for f in files),
-                                          "files": files}
+    manifest_splits = {
+        (manifest["town"], route["start"], route["end"]): split
+        for split, routes in manifest["routes"].items() for route in routes
+    } if manifest is not None else None
+    for domain, split in groups:
+        files = []
+        for path in episodes(root, domain, split):
+            with np.load(path, allow_pickle=False) as archive:
+                count = sample_count(archive, path)
+                metadata = check_route(archive, path, domain, split, route_splits)
+                if manifest_splits is not None:
+                    route = metadata["route"]
+                    identity = (metadata["town"], route["start"], route["end"])
+                    if manifest_splits.get(identity) != split:
+                        raise ValueError(f"{path}: recorded route is outside the manifest's {split} split.")
+                read_arrays(archive, path, count)
+            files.append({"file": str(path.relative_to(root)), "samples": count})
+        report[f"{domain}/{split}"] = {"episodes": len(files), "samples": sum(f["samples"] for f in files),
+                                      "files": files}
     return report
 
 

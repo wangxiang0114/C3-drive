@@ -46,6 +46,12 @@ def learning(parser):
     parser.add_argument("--output", type=Path, required=True)
 
 
+def detector_settings(parser):
+    parser.add_argument("--alpha", type=probability, default=0.05)
+    parser.add_argument("--block-size", type=positive, default=16)
+    parser.add_argument("--memory-budget", type=positive, default=256)
+
+
 def evaluation(parser, split):
     simulation(parser)
     learning(parser)
@@ -107,9 +113,20 @@ def command_parser():
     init = sub.add_parser("calibrate", help="Fit clean-domain statistics and an episode-level drift threshold")
     learning(init)
     init.add_argument("--checkpoint", type=Path, required=True)
-    init.add_argument("--alpha", type=probability, default=0.05)
-    init.add_argument("--block-size", type=positive, default=16)
-    init.add_argument("--memory-budget", type=positive, default=256)
+    detector_settings(init)
+
+    workflow = sub.add_parser("train-test", help="Train both models, validate them and test the selected student")
+    simulation(workflow)
+    learning(workflow)
+    detector_settings(workflow)
+    workflow.add_argument("--teacher-epochs", type=positive, default=30)
+    workflow.add_argument("--student-epochs", type=positive, default=40)
+    workflow.add_argument("--lr", type=positive_float, default=3e-4)
+    workflow.add_argument("--slots", type=positive, default=2)
+    workflow.add_argument("--seed", type=int, default=41)
+    workflow.add_argument("--calibrate", action="store_true", help="Prepare the selected student for continual adaptation")
+    workflow.add_argument("--test-mode", choices=("offline", "closed-loop", "both"), default="offline")
+    workflow.add_argument("--domains", nargs="+", choices=DOMAINS, default=["clean"], help="Held-out test domains")
 
     update = sub.add_parser("adapt", help="Detect a shift, train a candidate and apply the closed-loop gate")
     adaptation(update)
@@ -194,6 +211,11 @@ def main():
     args = parser.parse_args()
     if getattr(args, "traffic", 0) < 0:
         parser.error("--traffic must be nonnegative.")
+    if args.command == "train-test":
+        from .workflow import train_test
+
+        train_test(args, run_evaluation)
+        return
     if args.command == "inspect-data":
         from .data import inspect_dataset
 

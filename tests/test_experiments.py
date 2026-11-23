@@ -5,7 +5,7 @@ import unittest
 from pathlib import Path
 from subprocess import run
 from tempfile import TemporaryDirectory
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import numpy as np
 import torch
@@ -17,6 +17,7 @@ from c3drive.drift_eval import summarize, trace_episode
 from c3drive.model import Driver
 from c3drive.reporting import score_summary
 from c3drive.train import load, save
+from c3drive.workflow import train_test
 
 
 def profile(dimension):
@@ -33,6 +34,38 @@ def write_episode(directory, domain, split, route, samples=3, name="0000.npz"):
     arrays = {name: np.zeros((samples, *shape), dtype=dtype) for name, (shape, dtype) in SCHEMA.items()}
     np.savez_compressed(path, **arrays, samples=np.array(samples),
                         metadata=json.dumps({"town": "TestTown", "domain": domain, "route": route}))
+
+
+class TrainingWorkflowTests(unittest.TestCase):
+    def setUp(self):
+        temporary = TemporaryDirectory()
+        self.addCleanup(temporary.cleanup)
+        root = Path(temporary.name)
+        self.args = command_parser().parse_args(
+            ["train-test", "--output", str(root / "run"), "--data", str(root / "data"), "--limit", "1"]
+        )
+        for index, split in enumerate(("train", "validation", "test")):
+            write_episode(self.args.data, "clean", split, {"start": 2 * index, "end": 2 * index + 1})
+
+    def test_validates_both_checkpoints_and_tests_the_student(self):
+        evaluate = Mock()
+        with patch("c3drive.train.fit") as fit, patch("c3drive.carla_env.connect") as connect:
+            train_test(self.args, evaluate)
+        connect.assert_not_called()
+        self.assertEqual(fit.call_args_list[1].args[1], self.args.output / "teacher.pt")
+        self.assertEqual(
+            [(call.args[0].split, call.args[0].checkpoint.name, call.args[0].limit)
+             for call in evaluate.call_args_list],
+            [("validation", "teacher.pt", None), ("validation", "student.pt", None), ("test", "student.pt", 1)],
+        )
+
+    def test_rejects_train_test_route_overlap_before_training(self):
+        write_episode(self.args.data, "clean", "test", {"start": 0, "end": 1})
+        with patch("c3drive.train.fit") as fit:
+            with self.assertRaisesRegex(ValueError, "occurs in both train and test"):
+                train_test(self.args, Mock())
+        fit.assert_not_called()
+        self.assertFalse(self.args.output.exists())
 
 
 class TraceTests(unittest.TestCase):

@@ -16,7 +16,7 @@ import numpy as np
 import improve
 import long_boundary
 
-parser = argparse.ArgumentParser(description="Render the manuscript's synthetic figures.")
+parser = argparse.ArgumentParser(description="Render the figures from local input files.")
 parser.add_argument('--records', type=Path, required=True, help='Local directory with the figure input files')
 parser.add_argument('--inputs', type=Path, help='Override the local manuscript_plot_inputs.npz')
 parser.add_argument('--output', type=Path, required=True)
@@ -177,7 +177,7 @@ ref=np.load(RECORDS/'critical_event_reference.npz');pool=ref['rows'];S,R,C=pool[
 a.scatter(S,R,s=4,color='#bfc8d0',alpha=.5,edgecolors='none',label='Available');a.scatter(S[selected],R[selected],s=8,facecolors='none',edgecolors=BLUE,lw=.4,label='Selected');a.scatter(S[crit],R[crit],s=15,marker='^',facecolors='none',edgecolors=RED,lw=.6,label='Critical')
 a.set_xscale('symlog',linthresh=.0001);a.set_yscale('symlog',linthresh=.0001);a.set_xlabel('Severity');a.set_ylabel('Retention risk');a.legend(loc='upper left',ncol=3,fontsize=5.1);finishax(a)
 b=f.add_subplot(panel(f,gs[0,1],'b','Domain retention in the same candidate pool'))
-heat(b,coverage,[f'D{i}' for i in range(1,7)],SHORT);b.set_xlabel('Source domain (n: 12, 12, 11, 12, 12, 1)')
+heat(b,coverage,[f'D{i}' for i in range(1,7)],SHORT);b.set_xlabel('Source domain')
 c=f.add_subplot(panel(f,gs[1,0],'c','Replay ablation at a fixed budget'))
 for j in range(6):
     meanbar(c,ms[:,j,-1].mean(1),j-.16,BLUE,.29,'All-domain mean' if j==0 else None);meanbar(c,ms[:,j,-1].min(1),j+.16,GREEN,.29,'Worst domain' if j==0 else None)
@@ -201,8 +201,6 @@ for index, (col, lab, sty) in enumerate([(BLUE,'Coupled','-'), (PURPLE,'Weak','-
     a.plot(tt,gg,color=col,ls=sty,label=lab)
     b.plot(np.arange(128)+.5,arrays['detector_traces'][index,:,4],color=col,ls=sty,label=lab)
 for ax in [a,b]:
-    ax.axvspan(66,78,color='#e9eff5',zorder=-2)
-    for t,col in [(64,GRAY),(66,BLUE),(74,RED),(78,GREEN)]:ax.axvline(t,color=col,ls=':',lw=.7)
     ax.set_xlim(0,128);ax.set_xticks([0,32,64,96,128]);ax.set_xlabel('Time (blocks)');finishax(ax)
 a.axhline(1,color='#555555',ls='--',lw=.65);a.set_ylabel('Evidence / threshold');a.legend(loc='upper left',ncol=2);b.set_ylabel('Tracking score');b.set_ylim(.78,1.025);b.legend(loc='lower left',ncol=2)
 conds = ['appearance','hidden','coupled','gradual']

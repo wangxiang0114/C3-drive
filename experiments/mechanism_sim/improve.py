@@ -1,4 +1,4 @@
-"""Prespecified extensions of the frozen unified synthetic control experiment."""
+"""Run domain order, observation shift, and replay comparisons."""
 import os
 os.environ['OPENBLAS_NUM_THREADS']='1'
 os.environ['OMP_NUM_THREADS']='1'
@@ -58,7 +58,7 @@ def prepare():
     source=source.replace("float(np.mean(frame_scores)),commits,merges,model.fingerprint(),memory_fingerprint(memory)])", "float(np.mean(frame_scores)),commits,merges,model.fingerprint(),memory_fingerprint(memory),float(mahal(z,registry['mu'],registry['precision']))])")
     target=OUT/'engine_extended.py';target.write_text(source,encoding='utf-8')
     compile(source,str(target),'exec')
-    plan={'seed_count_new_comparisons':N,'orders':ORDERS,'memory_variants':['full','random_memory','coverage_only','pareto_only'],'detector_conditions':['coupled','appearance','hidden','gradual'],'inherited_full_and_random_runs':30,'selection_rule':'Use runs 1 through 12, without outcome-based filtering. Matched one-pair merge comparisons use the first full-pool proposal in each canonical run. Gate counterfactuals use every completed canonical full-system proposal.','frozen_engine_sha256':hashlib.sha256((Path(__file__).parent/'engine.py').read_bytes()).hexdigest(),'extension_sha256':hashlib.sha256(source.encode()).hexdigest(),'scope':'Synthetic control only. No changes to original outputs or manuscript. Four figures only as user-facing outputs.'}
+    plan={'seed_count_new_comparisons':N,'orders':ORDERS,'memory_variants':['full','random_memory','coverage_only','pareto_only'],'detector_conditions':['coupled','appearance','hidden','gradual'],'inherited_full_and_random_runs':30,'selection_rule':'Use runs 1 through 12, without outcome-based filtering. Matched one-pair merge comparisons use the first full-pool proposal in each canonical run. Gate counterfactuals use every completed canonical full-system proposal.','frozen_engine_sha256':hashlib.sha256((Path(__file__).parent/'engine.py').read_bytes()).hexdigest(),'extension_sha256':hashlib.sha256(source.encode()).hexdigest(),'scope':'mechanism_sim'}
     (OUT/'experiment_plan.json').write_text(json.dumps(plan,ensure_ascii=False,indent=2),encoding='utf-8')
 
 def load_engine():

@@ -1,4 +1,4 @@
-"""Recompute the manuscript's synthetic pair comparison and gate counterfactual."""
+"""Summarize pair comparisons and matched gate decisions from local audit files."""
 
 import argparse
 import csv

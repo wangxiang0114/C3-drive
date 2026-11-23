@@ -6,10 +6,20 @@ C3-Drive predicts future waypoints and target speed from RGB cameras, LiDAR, veh
 
 This repository includes route generation, expert data collection, teacher and student training, drift calibration, continual adaptation, and held-out evaluation. The commands below run the released CARLA workflow with self-collected data.
 
+## Quick start for training and testing
+
+With local episodes already prepared, run from the repository root.
+
+```powershell
+python -m c3drive train-test --data "D:\C3Drive\episodes" --output runs/first-training-run
+```
+
+This command audits the data splits, trains the teacher and student, reports their validation metrics, and tests the selected student on held-out episodes. [Input layout, closed-loop testing, and individual commands](docs/experiments.md#train-validate-and-test)
+
 ## Reproducibility
 
 - [Manuscript protocol and official result checks](docs/reproducibility.md) document the CARLA 0.9.15 and Bench2Drive v0.0.4 setup, the runnable checks, and the original experiment artifacts still needed to reproduce the reported Driving Scores.
-- [Synthetic mechanism experiments](docs/reproducibility.md#synthetic-mechanism-experiments) provide a workflow to generate the synthetic records and Figs. 7–10, plus a separate plotting command for existing local inputs.
+- [Plotting](docs/reproducibility.md#plotting) describes how to render figures from local input files.
 - The installation and training commands below run the public CARLA 0.9.16 workflow with self-collected data and a lightweight CNN–GRU planner. Use its local scores to evaluate that workflow.
 
 ## How it works
@@ -26,9 +36,7 @@ When all slots are occupied, C3-Drive ranks adapter pairs by the difference in t
 
 ### Deployment shifts in CARLA
 
-![CARLA examples of clean driving, camera stream disruption, partial observation, GPS noise, and speed estimation noise](docs/figures/carla-deployment-shifts.png)
-
-The figure illustrates four perturbations against a clean reference: camera stream disruption, partial observation, GPS localization noise, and ego-speed estimation noise. Use `camera-drop`, `occlusion`, `gps`, and `speed` with the collection and evaluation commands below.
+Use `camera-drop`, `occlusion`, `gps`, and `speed` to select deployment perturbations in the collection and evaluation commands below.
 
 For an end-to-end run of the public reference implementation, [run the sequential benchmark](docs/experiments.md) to produce a stage-by-domain score matrix, forgetting and backward-transfer metrics, and a record of each deployment decision. The same guide shows how to evaluate the drift detector offline.
 
@@ -142,6 +150,7 @@ Closed-loop evaluation reports per-route results, completion, collision and succ
 | [`c3drive/data.py`](c3drive/data.py) | Episode storage, temporal windows, and input batches |
 | [`c3drive/model.py`](c3drive/model.py) | Teacher, compact student, and fixed-capacity adapters |
 | [`c3drive/train.py`](c3drive/train.py) | Supervised training, distillation, and checkpoints |
+| [`c3drive/workflow.py`](c3drive/workflow.py) | Dataset checks, training, validation, and held-out testing |
 | [`c3drive/evaluate.py`](c3drive/evaluate.py) | Offline planning metrics and per-episode adapter routing |
 | [`c3drive/detector.py`](c3drive/detector.py) | Distribution fitting, block calibration, and drift detection |
 | [`c3drive/adapt.py`](c3drive/adapt.py) | Dual-anchor training, consolidation, replay, and deployment gate |

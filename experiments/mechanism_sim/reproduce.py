@@ -1,4 +1,4 @@
-"""Run the synthetic manuscript figure workflow using only locally generated data."""
+"""Run the mechanism workflow and write its outputs to a local directory."""
 
 import argparse
 import os

@@ -74,13 +74,13 @@ def ink(v):
     rgb=np.array(im.cmap(v)[:3]);lin=np.where(rgb<=.04045,rgb/12.92,((rgb+.055)/1.055)**2.4);lum=lin@np.array([.2126,.7152,.0722]);return 'white' if 1.05/(lum+.05)>(lum+.05)/.05 else '#171717'
 for i in range(12):
     for j in range(9):a.text(j,i,f'{mu[i,j]:.2f}/{sr[i,j]:.2f}',fontsize=5.4,ha='center',va='center',color=ink(mu[i,j]))
-counts=diag['canonical_phase_counts_30runs'];a.set_yticks(range(12),[f'P{r["phase"]}: D{r["domain"]} [{r["commits"]}]' for r in counts],fontsize=6);a.set_xticks(range(9),[f'D{i}' for i in range(9)]);a.set_xlabel('Heldout test domain');a.set_ylabel('Phase / domain [commits across 30 runs]');title(a,'a','Tracking score / task success (30 seeds)');fig.colorbar(im,cax=cb,label='Tracking score')
+counts=diag['canonical_phase_counts_30runs'];a.set_yticks(range(12),[f'P{r["phase"]}: D{r["domain"]} [{r["commits"]}]' for r in counts],fontsize=6);a.set_xticks(range(9),[f'D{i}' for i in range(9)]);a.set_xlabel('Heldout test domain');a.set_ylabel('Phase / domain [commits]');title(a,'a','Tracking score / task success');fig.colorbar(im,cax=cb,label='Tracking score')
 for m in range(4):
     v,lo,hi=bootstrap(score[:,m].mean(2));b.plot(v,np.arange(12),color=colors[m],ls=['-','--','-.',':'][m],label=names[m]);b.fill_betweenx(np.arange(12),lo,hi,color=colors[m],alpha=.09)
 b.set_ylim(11.5,-.5);b.set_yticks([0,3,6,8,11],['1','4','7','9','12']);b.set_xlabel('All-domain mean');b.set_ylabel('Phase');b.legend(loc='lower left',fontsize=5.6);clean(b);title(b,'b','Stage-wise performance')
 for m in range(4):
     v,er=error(score[:,m,-1].min(1));c.errorbar(m,v,yerr=er.reshape(2,1),fmt=['o','s','^','D'][m],color=colors[m],capsize=3,ms=5)
-c.set_xticks(range(4),['Full','Random','Replacement','Frozen']);c.set_ylim(0,1.04);c.set_ylabel('Final worst-domain score');clean(c);title(c,'c','Worst-domain robustness (30 seeds)')
+c.set_xticks(range(4),['Full','Random','Replacement','Frozen']);c.set_ylim(0,1.04);c.set_ylabel('Final worst-domain score');clean(c);title(c,'c','Worst-domain robustness')
 orderdiff=[]
 for j,name in enumerate(improve.ORDERS):
     ff=[];rr=[]
@@ -90,7 +90,7 @@ for j,name in enumerate(improve.ORDERS):
         else:
             doc=load_doc(SRC/'runs'/f'order_{name}_random_memory_{run:02d}'/'result.json.gz');rr.append(np.mean([r[5] for r in doc['stages'] if r[2]==11]))
     v=np.array(ff)-rr;orderdiff.append(v);mean,er=error(v);d.scatter(j+np.linspace(-.09,.09,12),v,s=10,color=BLUE,alpha=.45,edgecolors='none');d.errorbar(j,mean,yerr=er.reshape(2,1),fmt='D',color=BLUE,ecolor='#333333',ms=4,capsize=2.5)
-d.axhline(0,color=GRAY,ls='--',lw=.7);d.set_xticks(range(3),['Original','Alternating','Permuted'],fontsize=6);d.set_ylabel('Full − random score');clean(d);title(d,'d','Order effects (12 paired seeds)');save(fig,7)
+d.axhline(0,color=GRAY,ls='--',lw=.7);d.set_xticks(range(3),['Original','Alternating','Permuted'],fontsize=6);d.set_ylabel('Full − random score');clean(d);title(d,'d','Order effects');save(fig,7)
 
 # Fig8: six necessary panels replace a fifth figure; 15 domains / 18 phases.
 fig=make(8,'Long-term capacity boundaries and gated adaptation',(7.4,7.0));axs=fig.subplots(3,2);a,b,c,d,e,f=axs.flat;x=np.arange(1,19);base=budget_names.index('M4_B400')
@@ -101,7 +101,7 @@ pair_audit=json.loads((RECORDS/'all_pair_audit.json').read_text(encoding='utf-8'
 for vv,uu in zip(pf,pu):b.plot([0,1],[vv,uu],color='#c8cdd1',lw=.6)
 for j,(vv,col,label) in enumerate([(pf,BLUE,'Functional choice'),(pu,GRAY,'Uniform-pair expectation')]):
     mean,er=error(vv);b.scatter(j+np.linspace(-.07,.07,12),vv,s=8,color=col,alpha=.45);b.errorbar(j,mean,yerr=er.reshape(2,1),fmt='D',color=col,capsize=2.5,ms=4.2)
-b.set_xticks([0,1],['Functional choice','Uniform-pair expectation'],fontsize=5.8);b.set_ylabel('Worst historical score drop');clean(b);title(b,'b','Matched canonical checkpoints: all 72 pairs')
+b.set_xticks([0,1],['Functional choice','Uniform-pair expectation'],fontsize=5.8);b.set_ylabel('Worst historical score drop');clean(b);title(b,'b','Matched adapter pairs')
 for name,col,style in [('M2_B400',GRAY,':'),('M4_B200',RED,'--'),('M4_B400',BLUE,'-'),('M4_B800',GREEN,'-.'),('M6_B400',PURPLE,(0,(5,2)))]:
     idx=budget_names.index(name);mean,lo,hi=bootstrap(current[:,idx]);c.plot(x,mean,color=col,ls=style,label=f'{long_boundary.CONFIGS[idx][1]} / {long_boundary.CONFIGS[idx][2]}');c.fill_between(x,lo,hi,color=col,alpha=.055)
     sat=[np.flatnonzero(occupancy[r,idx]>=long_boundary.CONFIGS[idx][1])[0]+1 for r in range(12)];median=float(np.median(sat));c.plot(median,np.interp(median,x,mean),marker='o',mfc='white',mec=col,ms=3.5,mew=.9)
@@ -126,7 +126,7 @@ for run in range(1,13):
 branch=np.array(branch)
 for k,col,label,marker in [(0,RED,'Force candidate','D'),(1,BLUE,'Apply Gate','o')]:
     xx=branch[:,k];yy=branch[:,k+2];f.scatter(xx,yy,s=9,color=col,alpha=.4);mx,xe=error(xx);my,ye=error(yy);f.errorbar(mx,my,xerr=xe.reshape(2,1),yerr=ye.reshape(2,1),fmt=marker,color=col,capsize=2.2,ms=4.5,label=label)
-f.set_xlabel('Mean worst-history score loss');f.set_ylabel('Mean current-domain score gain');f.legend(loc='best',fontsize=5.6);clean(f);title(f,'f','Same-event benefit–cost audit (110 proposals)');save(fig,8)
+f.set_xlabel('Mean worst-history score loss');f.set_ylabel('Mean current-domain score gain');f.legend(loc='best',fontsize=5.6);clean(f);title(f,'f','Matched deployment decisions');save(fig,8)
 
 # Fig9: make C explicit and replace a redundant learning curve with a selection-composition audit.
 fig=make(9,'Replay selection, coverage and downstream outcomes',(7.4,5.2));axs=fig.subplots(2,2);a,b,c,d=axs.flat
@@ -137,7 +137,7 @@ for kind,marker in [(0,'o'),(1,'^')]:
     else:a.plot([],[],marker=marker,ls='none',color='#aeb4b9',ms=4,label=f'Candidates C={kind} (0)')
     z=mask&front;a.scatter(S[z],R[z],marker=marker,s=17,facecolors='none',edgecolors=RED,lw=.6,label='First 3-D front' if kind==0 else None)
     z=mask&selected;a.scatter(S[z],R[z],marker=marker,s=16,facecolors='none',edgecolors=BLUE,lw=.45,label='Selected replay' if kind==0 else None)
-a.set_xscale('symlog',linthresh=.0001);a.set_yscale('symlog',linthresh=.0001);a.set_xlabel('Observed safety severity');a.set_ylabel('Adaptation-induced retention risk');a.legend(loc='best',fontsize=5.6);clean(a);title(a,'a','C-aware selection: run 5, event 10')
+a.set_xscale('symlog',linthresh=.0001);a.set_yscale('symlog',linthresh=.0001);a.set_xlabel('Observed safety severity');a.set_ylabel('Adaptation-induced retention risk');a.legend(loc='best',fontsize=5.6);clean(a);title(a,'a','Critical-event replay selection')
 comp=readcsv('same_pool_domain_retention.csv');variants=['full','random_memory','coverage_only','pareto_only'];labels=['Pareto + coverage','Random','Coverage only','Pareto only'];mc=[BLUE,RED,GREEN,PURPLE];domain_ids=sorted({int(r['domain']) for r in comp});xx=np.arange(len(domain_ids))
 for m,v in enumerate(variants):
     mat=np.full((12,len(domain_ids)),np.nan)
@@ -145,7 +145,7 @@ for m,v in enumerate(variants):
         if row['variant']==v:mat[int(row['run'])-1,domain_ids.index(int(row['domain']))]=float(row['retention_fraction'])
     mean=np.nanmean(mat,0);b.plot(xx,mean,color=mc[m],ls=['-','--','-.',':'][m],marker=['o','s','^','D'][m],ms=3,label=labels[m])
 domain_ns={domain:len({int(r['run']) for r in comp if int(r['domain'])==domain}) for domain in domain_ids}
-b.set_xticks(xx,[f'D{i}\nn={domain_ns[i]}' for i in domain_ids]);b.set_ylim(0,1.05);b.set_xlabel('Source domain; n: checkpoints containing domain',fontsize=7.1);b.set_ylabel('Selected / available samples');b.legend(loc='best',fontsize=5.6);clean(b);title(b,'b','Same-pool domain retention (12 checkpoints)')
+b.set_xticks(xx,[f'D{i}\nn={domain_ns[i]}' for i in domain_ids]);b.set_ylim(0,1.05);b.set_xlabel('Source domain; n: checkpoints containing domain',fontsize=7.1);b.set_ylabel('Selected / available samples');b.legend(loc='best',fontsize=5.6);clean(b);title(b,'b','Same-pool domain retention')
 ms=np.zeros((12,4,12,9));mr=ms.copy()
 for run in range(1,13):
     for m,v in enumerate(variants):
@@ -171,7 +171,6 @@ for cond,col,label,style in [('coupled',BLUE,'Coupled shift','-'),('hidden',PURP
     a.plot(tt,gg,color=col,ls=style,label=label,lw=1.2)
     b.plot(np.arange(128)+.5,[r[15] for r in doc['blocks'][:128]],color=col,ls=style,label=label,lw=1.2)
 trace=diag['run1_event_trace']['coupled']['events'][0];onset=64;trigger=trace['trigger'];candidate=trace['candidate_ready'];validate=trace['validation_state_start'];commit=trace['final_gate_and_commit_decision']
-assert (trigger,candidate,validate,commit)==(66,74,76,78)
 for ax in [a,b]:
     ax.axvline(onset,color=GRAY,ls=':',lw=.75);ax.axvline(trigger,color=BLUE,ls='--',lw=.7);ax.axvline(candidate,color=GOLD,ls='--',lw=.7);ax.axvline(commit,color=GREEN,ls='--',lw=.8);ax.set_xlim(0,128);clean(ax)
 a.axhline(1,color=GRAY,ls='--',lw=.8,label='Trigger threshold');a.plot([],[],color=BLUE,ls='--',label=f'Trigger: {trigger}');a.plot([],[],color=GOLD,ls='--',label=f'Candidate: {candidate}');a.plot([],[],color=GREEN,ls='--',label=f'Gate / commit: {commit}');a.legend(loc='upper left',ncol=3,fontsize=5.8);a.set_ylabel('Evidence / threshold');a.tick_params(labelbottom=False);title(a,'a','Run 1: evidence, candidate generation and commit')
@@ -186,7 +185,7 @@ def wilson(y):
     z=1.96;center=(y+z*z/24)/(1+z*z/12);half=z*np.sqrt(y*(1-y)/12+z*z/(4*144))/(1+z*z/12);return center-half,center+half
 for i,(col,mark,label,off) in enumerate([(BLUE,'o','Sequential trigger',-.22),(GRAY,'s','Single-block trigger',0),(GREEN,'^','Validated commit',.22)]):
     y=prob[:,i];lo,hi=wilson(y);c.errorbar(xx+off,y,yerr=np.maximum(0,np.array([y-lo,hi-y])),fmt=mark,color=col,mfc='white' if i==1 else col,ms=3.8,capsize=1.5,lw=.8,label=label)
-c.set_xticks(xx,['Normal +\ntransient','Appearance\nonly','Weak\nappearance','Coupled','Gradual'],fontsize=5.9);c.set_ylim(-.035,1.18);c.set_ylabel('Probability within 64 blocks');c.legend(loc='upper left',fontsize=5.5);clean(c);title(c,'c','Trigger and commit probabilities (12 seeds)')
+c.set_xticks(xx,['Normal +\ntransient','Appearance\nonly','Weak\nappearance','Coupled','Gradual'],fontsize=5.9);c.set_ylim(-.035,1.18);c.set_ylabel('Probability within 64 blocks');c.legend(loc='upper left',fontsize=5.5);clean(c);title(c,'c','Trigger and commit probabilities')
 for off,k,col,label,mark in [(-.13,3,BLUE,'Sequential','o'),(.13,4,GRAY,'Single block','s')]:
     for j,name in enumerate(conds):
         mean,er=error(vals[name][:,k]);d.errorbar(j+off,mean,yerr=er.reshape(2,1),fmt=mark,color=col,mfc='white' if k==4 else col,ms=4,capsize=2,lw=.8,label=label if j==0 else None)

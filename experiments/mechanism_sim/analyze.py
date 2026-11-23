@@ -8,7 +8,7 @@ from matplotlib import font_manager
 from matplotlib.ticker import MaxNLocator
 import engine
 
-parser = argparse.ArgumentParser(description="Render the archived synthetic mechanism plots.")
+parser = argparse.ArgumentParser(description="Render mechanism plots from local run files.")
 parser.add_argument('--directory', type=Path, required=True)
 args = parser.parse_args()
 OUT = args.directory

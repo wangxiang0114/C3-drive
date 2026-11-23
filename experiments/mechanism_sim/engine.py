@@ -1,9 +1,7 @@
-"""A reproducible synthetic driving-control system. No CARLA or measured data.
+"""Closed-loop mechanism test environment.
 
 Detector -> collection -> random-feature adapter training / distillation ->
-Pareto replay proposal -> finite closed-loop validation -> atomic commit.
-This archive includes the original simulation underlying early mechanism plots.
-"""
+Pareto replay proposal -> finite closed-loop validation -> atomic commit."""
 import os
 os.environ['OPENBLAS_NUM_THREADS']='1'
 os.environ['OMP_NUM_THREADS']='1'
@@ -18,7 +16,7 @@ M=4;H=24;DX=7;DC=8;DP=DX+DC;DB=H+1;BUDGET=400
 L=16;PHASE_BLOCKS=64;SEQUENCE=[0,1,2,3,4,5,6,7,8,2,0,5]
 TOTAL_BLOCKS=PHASE_BLOCKS*len(SEQUENCE);RHO=.5;KAPPA=1.1
 ALLOCATED=DX*2+M*(DP*H+DB*2)
-CONFIG={'seed':SEED,'description':'Synthetic closed-loop lateral and speed control; not a CARLA reproduction','slots':M,'adapter_hidden_units':H,'replay_budget':BUDGET,'sequence':SEQUENCE,'phase_blocks':PHASE_BLOCKS,'frames_per_block':L,'time_step':.1,'episode_steps':56,'test_episodes_per_domain':20,'gate_episodes_per_domain':12,'fit_blocks_initial':512,'calibration_blocks_initial':512,'fit_blocks_new':128,'calibration_blocks_new':128,'threshold_episodes':600,'threshold_episode_length_blocks':TOTAL_BLOCKS,'alpha_episode':.01,'rho':RHO,'kappa':KAPPA,'historical_gate_tolerance':.06,'clean_gate_tolerance':.035,'new_domain_min_improvement':.004,'success_tolerance':.09,'terminal_cross_track_tolerance':.2,'terminal_heading_tolerance':.12,'terminal_speed_error_tolerance':.3,'collector_episodes':32,'collector_steps':128,'training_samples_per_event':512,'collection_blocks':8,'proposal_block_offset':8,'decision_block_offset':12,'rejection_cooldown_blocks':8,'ridge':1e-4,'replay_anchor_weight':.6,'allocated_scalar_parameters':ALLOCATED,'variants':['full','random_memory','replace_oldest','frozen'],'representative_run':1}
+CONFIG={'seed':SEED,'description':'Closed-loop lateral and speed control','slots':M,'adapter_hidden_units':H,'replay_budget':BUDGET,'sequence':SEQUENCE,'phase_blocks':PHASE_BLOCKS,'frames_per_block':L,'time_step':.1,'episode_steps':56,'test_episodes_per_domain':20,'gate_episodes_per_domain':12,'fit_blocks_initial':512,'calibration_blocks_initial':512,'fit_blocks_new':128,'calibration_blocks_new':128,'threshold_episodes':600,'threshold_episode_length_blocks':TOTAL_BLOCKS,'alpha_episode':.01,'rho':RHO,'kappa':KAPPA,'historical_gate_tolerance':.06,'clean_gate_tolerance':.035,'new_domain_min_improvement':.004,'success_tolerance':.09,'terminal_cross_track_tolerance':.2,'terminal_heading_tolerance':.12,'terminal_speed_error_tolerance':.3,'collector_episodes':32,'collector_steps':128,'training_samples_per_event':512,'collection_blocks':8,'proposal_block_offset':8,'decision_block_offset':12,'rejection_cooldown_blocks':8,'ridge':1e-4,'replay_anchor_weight':.6,'allocated_scalar_parameters':ALLOCATED,'variants':['full','random_memory','replace_oldest','frozen'],'representative_run':1}
 
 def rng_for(*ids):return np.random.default_rng(np.random.SeedSequence([SEED,*map(int,ids)]))
 def plain(a):

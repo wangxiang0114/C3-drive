@@ -1,6 +1,31 @@
 # Experiment workflows
 
-These workflows run the public CARLA 0.9.16 reference implementation on self-collected routes and use the [local route score](../README.md#6-test-on-held-out-routes). See the [manuscript reproducibility guide](reproducibility.md) for the Bench2Drive evaluation setup, official result checking, and synthetic mechanism experiments.
+These workflows run the public CARLA 0.9.16 reference implementation on self-collected routes and use the [local route score](../README.md#6-test-on-held-out-routes). See the [manuscript reproducibility guide](reproducibility.md) for the Bench2Drive evaluation setup, official result checking, and plotting commands.
+
+## Train, validate, and test
+
+Install the project's Python dependencies. For offline testing, place local episodes in `<data>/clean/train/`, `<data>/clean/validation/`, and `<data>/clean/test/`. Each directory contains NPZ episodes in the [repository format](dataset.md). If you need to collect episodes using an existing CARLA installation, follow the [collection instructions](../README.md#2-generate-routes-and-collect-data) and include `test` for offline evaluation.
+
+```powershell
+python -m c3drive train-test --data "D:\C3Drive\episodes" --device cuda --output runs/offline-training
+```
+
+The workflow checks file contents and route separation before training. It trains the teacher on the clean training split, distills the student from the selected teacher, and selects both checkpoints by validation planning loss. The held-out test split is used for the final student evaluation. Offline reports include planning loss, average and final displacement errors in metres, and speed mean absolute error in metres per second. Use `--device cpu` for CPU training and adjust `--batch-size` to available memory.
+
+For closed-loop testing, start CARLA and provide the route manifest used to produce your training and validation episodes. The workflow checks those episodes against the manifest before training. Use `--test-mode both` to also evaluate the recorded test episodes. Each offline test domain needs its own `<data>/<domain>/test/` directory.
+
+```powershell
+python -m c3drive train-test --data "D:\C3Drive\episodes" --manifest "D:\C3Drive\routes.json" --test-mode closed-loop --domains clean camera-drop --output runs/closed-loop-training
+```
+
+Use `--calibrate` when you want a checkpoint ready for continual adaptation. It requires the separate `clean/fit`, `clean/calibrate`, and `clean/threshold` splits. The workflow tests the calibrated checkpoint when this flag is supplied. Use the [sequential benchmark](#sequential-closed-loop-benchmark) to train and validate adaptation candidates under deployment shifts.
+
+The output directory contains `teacher.pt`, `student.pt`, both validation reports, and the selected test reports. `workflow.json` ties these files to the tested checkpoint. To reevaluate an existing checkpoint without retraining, use the individual commands.
+
+```powershell
+python -m c3drive validate --data "D:\C3Drive\episodes" --checkpoint runs/offline-training/student.pt --output runs/validation-repeat.json
+python -m c3drive test --mode offline --domains clean --data "D:\C3Drive\episodes" --checkpoint runs/offline-training/student.pt --output runs/test-repeat.json
+```
 
 ## Sequential closed-loop benchmark
 

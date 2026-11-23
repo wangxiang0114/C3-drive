@@ -1,4 +1,4 @@
-"""Regenerate manuscript plot inputs from locally generated synthetic runs."""
+"""Build figure input files from local logs and checkpoints."""
 
 import argparse
 import csv

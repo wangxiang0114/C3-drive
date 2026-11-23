@@ -9,7 +9,7 @@ This repository includes route generation, expert data collection, teacher and s
 ## Reproducibility
 
 - [Manuscript protocol and official result checks](docs/reproducibility.md) document the CARLA 0.9.15 and Bench2Drive v0.0.4 setup, the runnable checks, and the original experiment artifacts still needed to reproduce the reported Driving Scores.
-- [Synthetic mechanism experiments](docs/reproducibility.md#synthetic-mechanism-experiments) provide plotting scripts for Figs. 7–10 that read locally supplied experiment records.
+- [Synthetic mechanism experiments](docs/reproducibility.md#synthetic-mechanism-experiments) provide a workflow to generate the synthetic records and Figs. 7–10, plus a separate plotting command for existing local inputs.
 - The installation and training commands below run the public CARLA 0.9.16 workflow with self-collected data and a lightweight CNN–GRU planner. Use its local scores to evaluate that workflow.
 
 ## How it works

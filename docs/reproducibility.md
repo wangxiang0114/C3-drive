@@ -15,9 +15,7 @@ The EAAI manuscript describes a CARLA 0.9.15 experiment using Bench2Drive v0.0.4
 Set up [Bench2Drive at tag 0.0.4](https://github.com/Thinklab-SJTU/Bench2Drive/tree/0.0.4) with CARLA 0.9.15 using the upstream instructions. Preserve the tagged route file bytes. The command below validates the route file by SHA-256 and verifies all 220 route IDs. It uses only Python's standard library and can run separately from the evaluator.
 
 ```bash
-mkdir -p runs
-curl --fail --location https://raw.githubusercontent.com/Thinklab-SJTU/Bench2Drive/0.0.4/leaderboard/data/bench2drive_0.0.4_val.xml -o runs/bench2drive_0.0.4_val.xml
-python -m c3drive.paper_eval --routes runs/bench2drive_0.0.4_val.xml --output runs/route-audit.json
+python -m c3drive.paper_eval --routes "/path/to/local/bench2drive_0.0.4_val.xml" --output runs/route-audit.json
 ```
 
 Use [the official v0.0.4 dataset](https://huggingface.co/datasets/rethinklab/Bench2Drive-V0.0.4) for the 1,100 training routes and the [upstream evaluator](https://github.com/Thinklab-SJTU/Bench2Drive/blob/0.0.4/leaderboard/leaderboard/leaderboard_evaluator.py) for CARLA results. For an actual run, provide the agent implementation and its checkpoint through the evaluator's agent arguments. Archive the evaluator revision, simulator build, perturbation code and seeds, route subset and split files, the checkpoint hash, and the unmodified output JSON together.
@@ -31,6 +29,28 @@ python -m c3drive.paper_eval --routes runs/bench2drive_0.0.4_val.xml \
 ```
 
 The checker verifies full route coverage, status, result order, report duplication by file hash, and agreement between per-route scores and global means. Multiple reports produce an across-report mean and sample standard deviation. It neither infers the original held-out partition nor verifies that an agent, perturbation implementation, or seed produced a supplied JSON. An audit of the complete upstream validation set cannot substitute for the manuscript's split-specific experiments. See the [Leaderboard score definition](https://leaderboard.carla.org/evaluation_v2_0/).
+
+### Sequential Driving Score table
+
+Use the local manifest to rebuild the Table 4 metrics from finished evaluator reports on the actual held-out route subsets. Paths are relative to the manifest or absolute. The manifest has these fields.
+
+| Field | Value |
+| --- | --- |
+| `routes` | Path to the unchanged tagged validation XML |
+| `domains` | `["clean", "camera-drop", "occlusion", "gps", "speed"]` for the default order |
+| `seeds` | Five distinct integer seeds from the experiment |
+| `methods` | Distinct method labels used in the reports |
+| `repetitions` | Official evaluator repetitions per route |
+| `test_routes` | Object mapping every domain to its original held-out route IDs as strings |
+| `reports` | Array of objects with `method`, `seed`, `stage`, `domain`, `policy`, and `file` |
+
+For each method and seed, use stage 0 for the clean baseline and stages 1–4 for the four updates. Supply one `deployed` report per domain already seen at each stage. Supply a `before_update` report on the incoming domain at each update, evaluated on that same domain's held-out routes. This gives 15 deployed and four before-update reports per method and seed. For example, the first pre-update report has `stage` 1, `domain` `camera-drop`, and `policy` `before_update`.
+
+```bash
+python -m c3drive.paper_table --manifest "/path/to/local/report-manifest.json" --output runs/table4.json
+```
+
+The output includes the per-seed stage-by-domain matrices, gains, and the five-seed mean and sample standard deviation for each metric. Current-domain DS is reported both as the final incoming-domain score and as the average of the four post-update incoming-domain scores. Adaptation gain averages the four paired before/after deltas. Final cross-domain DS, forgetting, and backward transfer use the manuscript's stage-matrix definitions. The manifest must come from the experiment owner to establish the true split, method, and seed provenance.
 
 ## Synthetic mechanism experiments
 
@@ -52,6 +72,14 @@ The script exports Figs. 7–10 to PNG, PDF, and SVG. Point the command at a loc
 
 Keep these inputs outside the repository. Use the tested plotting dependencies and Times New Roman when comparing PNGs with the original artwork. The renderer falls back to DejaVu Serif when Times New Roman is unavailable.
 
+To generate the synthetic inputs and figures together on a machine of your choice, run the following command after installing the pinned dependencies. This workflow generates its inputs and outputs under the requested path and requires no driving dataset.
+
+```bash
+python experiments/mechanism_sim/reproduce.py --output "/path/to/new/local/synthetic-run"
+```
+
+The figure files are written to `manuscript-figures/figures/` under that output directory. The individual commands below are available for reusing existing runs.
+
 To rerun the synthetic simulator separately and analyze the new logs:
 
 ```bash
@@ -69,12 +97,13 @@ After completing the 30 runs and the base analyzer, generate the synthetic varia
 python experiments/mechanism_sim/improve.py
 python experiments/mechanism_sim/long_boundary.py
 python experiments/mechanism_sim/quota_revision.py
-python experiments/mechanism_sim/plot_quota.py --records "/path/to/local/plot-data" --output runs/mechanism-figures
-python experiments/mechanism_sim/collect_plot_inputs.py --replay-arrays runs/mechanism-figures/data/replay_plot_arrays.npz --output runs/rerun-figure-inputs.npz
-python experiments/mechanism_sim/plot_manuscript.py --records "/path/to/local/plot-data" --inputs runs/rerun-figure-inputs.npz --output runs/rerun-manuscript-figures
+python experiments/mechanism_sim/build_plot_records.py --output runs/local-plot-records
+python experiments/mechanism_sim/plot_quota.py --records runs/local-plot-records --output runs/mechanism-figures
+python experiments/mechanism_sim/collect_plot_inputs.py --replay-arrays runs/mechanism-figures/data/replay_plot_arrays.npz --output runs/local-plot-records/manuscript_plot_inputs.npz
+python experiments/mechanism_sim/plot_manuscript.py --records runs/local-plot-records --output runs/rerun-manuscript-figures
 ```
 
-The extended scripts run 132 order and shift-condition jobs, 84 long-horizon jobs, and 48 quota jobs. The plotting script combines their outputs with the local audit inputs supplied via the records option and generates the mechanism panels corresponding to Figs. 7–10. The plotting commands first build replay arrays, then gather inputs and render the manuscript layout. This route reuses the supplied pair and gate audits and reference replay records. The quota plot also reads the local protocol diagnostics and both same-pool retention CSVs. A rerun on another platform or numerical stack may change individual gate decisions and derived figures. Use the original local plotting inputs when comparing with the archived manuscript figures. Runtime depends on CPU and available storage. Set `C3DRIVE_BASE_RUNS`, `C3DRIVE_EXTENDED_RUNS`, `C3DRIVE_LONG_RUNS`, or `C3DRIVE_QUOTA_RUNS` to reuse the corresponding archived run directory.
+The extended scripts run 132 order and shift-condition jobs, 84 long-horizon jobs, and 48 quota jobs. The record builder regenerates the pair checks, gate counterfactual inputs, replay comparisons, and detector diagnostics from the generated synthetic logs and checkpoints. The remaining commands assemble the plot inputs and render the manuscript layout. A rerun on another platform or numerical stack may change individual gate decisions and derived figures. Set `C3DRIVE_BASE_RUNS`, `C3DRIVE_EXTENDED_RUNS`, `C3DRIVE_LONG_RUNS`, or `C3DRIVE_QUOTA_RUNS` to reuse the corresponding local run directories.
 
 The archived engine and plotting script preserve the simulation logic and adapt the paths for distribution. The original engine SHA-256 was `36cbc2def6f6bb1fbe67ee10c4b18c580389b21010dcc7a6e84063d7d7dfcfeb`. The output configuration records the distributed engine SHA-256.
 

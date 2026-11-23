@@ -93,9 +93,10 @@ def heat(a,mat,xlab,ylab,fmt='.2f',vmax=1):
 
 def redraw_pair_panel(ax, functional, uniform):
     from matplotlib.patches import Rectangle
-    assert len(functional) == len(uniform) == 12
-    assert min(min(functional), min(uniform)) >= 0
-    assert max(max(functional), max(uniform)) <= .05
+    if len(functional) != 12 or len(uniform) != 12:
+        raise ValueError("Figure 8 requires 12 matched adapter-pair comparisons.")
+    lower = min(0, np.floor(min(functional.min(), uniform.min()) * 100) / 100)
+    upper = max(.05, np.ceil(max(functional.max(), uniform.max()) * 100) / 100)
     ax.clear()
     for p, u in zip(functional, uniform):
         ax.plot([0, 1], [p, u], color='#83919D', alpha=.35, lw=.68, zorder=1)
@@ -107,8 +108,8 @@ def redraw_pair_panel(ax, functional, uniform):
                    edgecolor='white', lw=.35, zorder=3)
         ax.hlines(median, x-.16, x+.16, color='white', lw=1.05, zorder=4)
     ax.set_xlim(-.28, 1.28)
-    ax.set_ylim(0, .05)
-    ax.set_yticks(np.linspace(0, .05, 6))
+    ax.set_ylim(lower, upper)
+    ax.set_yticks(np.linspace(lower, upper, 6))
     ax.set_xticks([0, 1], ['Functional', 'Uniform'])
     ax.set_ylabel('Worst historical loss')
     finishax(ax)

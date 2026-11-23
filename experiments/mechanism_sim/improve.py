@@ -33,7 +33,9 @@ def prepare():
             if len(ids)<=need:chosen.extend(ids.tolist())
             else:chosen.extend(rng.choice(ids,need,replace=False).tolist());break""")
     source=source.replace("options.sort(key=lambda a:a[3])", """options.sort(key=lambda a:a[3])
-        if MERGE_STRATEGY=='random' and options:
+        if isinstance(MERGE_STRATEGY, tuple):
+            options=[o for o in options if (o[1],o[2])==MERGE_STRATEGY]
+        elif MERGE_STRATEGY=='random' and options:
             options=[options[int(rng_for(run,971,block).integers(len(options)))]]
         elif MERGE_STRATEGY=='parameter' and options:
             options.sort(key=lambda a:float(np.sum((old.U[a[1]]-old.U[a[2]])**2)+np.sum((old.V[a[1]]-old.V[a[2]])**2)))

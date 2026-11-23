@@ -5,8 +5,10 @@ import engine
 import quota_revision as q
 
 parser = argparse.ArgumentParser(description="Rebuild final synthetic mechanism figures from simulation artifacts.")
+parser.add_argument('--records', type=Path, required=True, help='Local audit and replay records')
 parser.add_argument('--output', type=Path, required=True)
 args = parser.parse_args()
+RECORDS = args.records
 FIGURE_OUTPUT = args.output
 FIGURE_OUTPUT.mkdir(parents=True, exist_ok=False)
 (FIGURE_OUTPUT / 'data').mkdir()

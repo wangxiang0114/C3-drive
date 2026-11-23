@@ -1,9 +1,13 @@
 from pathlib import Path
+import argparse
 import json,gzip,csv,re
 import numpy as np
 import improve,long_boundary
 OUT=long_boundary.OUT;OLD=improve.OLD;SRC=improve.OUT
-RECORDS=Path(__file__).with_name('records')
+if 'RECORDS' not in globals():
+    parser = argparse.ArgumentParser(description='Plot long-horizon mechanism results from local records.')
+    parser.add_argument('--records', type=Path, required=True, help='Local audit and replay records')
+    RECORDS = parser.parse_args().records
 import matplotlib
 matplotlib.use('Agg')
 import matplotlib.pyplot as plt

@@ -16,11 +16,19 @@ import numpy as np
 import improve
 import long_boundary
 
-RECORDS = Path(__file__).with_name('records')
 parser = argparse.ArgumentParser(description="Render the manuscript's synthetic figures.")
-parser.add_argument('--inputs', type=Path, default=RECORDS / 'manuscript_plot_inputs.npz')
+parser.add_argument('--records', type=Path, required=True, help='Local directory with the figure input files')
+parser.add_argument('--inputs', type=Path, help='Override the local manuscript_plot_inputs.npz')
 parser.add_argument('--output', type=Path, required=True)
 args = parser.parse_args()
+RECORDS = args.records
+inputs = args.inputs or RECORDS / 'manuscript_plot_inputs.npz'
+sourcepaths = [inputs, *(RECORDS / name for name in (
+    'all_pair_audit.json', 'canonical_gate_clause_audit.csv', 'critical_event_reference.npz',
+))]
+missing = [str(path) for path in sourcepaths if not path.is_file()]
+if missing:
+    parser.error('Missing local figure inputs: ' + ', '.join(missing))
 DEST = args.output
 PLOTS = DEST / 'figures'
 PLOTS.mkdir(parents=True, exist_ok=False)
@@ -29,7 +37,7 @@ PLOTS.mkdir(parents=True, exist_ok=False)
 setup = Path(__file__).with_name('plot_boundary.py').read_text(encoding='utf-8')
 style = setup[setup.index("for name in ['times.ttf'"):setup.index("def clean(ax):")]
 exec(compile(style, '<mechanism-plot-style>', 'exec'))
-with np.load(args.inputs) as archive:
+with np.load(inputs) as archive:
     arrays = dict(archive)
 ms = arrays['score']
 mr = arrays['success']
@@ -48,7 +56,6 @@ BLUE='#2D547B';RED='#C87545';GREEN='#4F8C8D';PURPLE='#86759E';GRAY='#82909D';GOL
 COL=[GRAY,RED,BLUE,GREEN,PURPLE,GOLD];SHORT=['Original','Random','Quota-risk','Quota-rand.','Coverage','Pareto']
 HEAT=LinearSegmentedColormap.from_list('paper_blue',['#F5F8FC','#D2DFEC','#90ADCA','#416C98','#153653'])
 plt.rcParams.update({'font.size':7,'axes.labelsize':7,'xtick.labelsize':6,'ytick.labelsize':6,'legend.fontsize':5.4,'axes.linewidth':.55,'lines.linewidth':1.15,'axes.edgecolor':'#333333','axes.labelcolor':'black','text.color':'black','axes.labelpad':2,'xtick.major.size':2,'ytick.major.size':2,'legend.handlelength':1.8,'legend.columnspacing':.8,'legend.handletextpad':.4})
-sourcepaths = [args.inputs, RECORDS / 'canonical_gate_clause_audit.csv']
 before={p.name:hashlib.sha256(p.read_bytes()).hexdigest() for p in sourcepaths}
 fonts={}
 def fig(n,t,size):

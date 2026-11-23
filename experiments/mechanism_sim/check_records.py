@@ -7,9 +7,6 @@ from pathlib import Path
 from statistics import mean
 import json
 
-RECORDS = Path(__file__).with_name("records")
-
-
 def grouped_rows(path):
     groups = defaultdict(list)
     with path.open(encoding="utf-8-sig", newline="") as handle:
@@ -20,7 +17,7 @@ def grouped_rows(path):
     return groups.values()
 
 
-def summarize(records=RECORDS):
+def summarize(records):
     selected, uniform = [], []
     for group in grouped_rows(records / "all_pair_validation_metrics.csv"):
         chosen = [row for row in group if row["functional_selected"] == "True"]
@@ -59,6 +56,6 @@ def summarize(records=RECORDS):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--records", type=Path, default=RECORDS)
+    parser.add_argument("--records", type=Path, required=True, help="Local audit CSV directory")
     args = parser.parse_args()
     print(json.dumps(summarize(args.records), indent=2, allow_nan=False))

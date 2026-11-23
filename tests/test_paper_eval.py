@@ -6,7 +6,6 @@ import unittest
 from unittest.mock import patch
 
 from c3drive import paper_eval
-from experiments.mechanism_sim.check_records import summarize
 
 
 class PaperEvaluationTest(unittest.TestCase):
@@ -60,15 +59,3 @@ class PaperEvaluationTest(unittest.TestCase):
                 self.assertEqual(paper_eval.audit_files(xml, [path], 1)["unique_routes"], 2)
                 with self.assertRaisesRegex(ValueError, "duplicates"):
                     paper_eval.audit_files(xml, [path, path], 1)
-
-
-class ArchivedMechanismTest(unittest.TestCase):
-    def test_paper_values_from_records(self):
-        result = summarize()
-        self.assertEqual(result["pair_candidates"], 72)
-        self.assertEqual(result["gate_proposals"], 110)
-        self.assertEqual(round(result["pair_mean_worst_historical_loss"]["functional"], 4), 0.0073)
-        self.assertEqual(round(result["pair_mean_worst_historical_loss"]["uniform"], 4), 0.0168)
-        self.assertEqual(round(result["gate_mean_historical_loss"]["forced"], 4), 0.0264)
-        self.assertEqual(round(result["gate_mean_historical_loss"]["accepted_policy"], 4), 0.0084)
-        self.assertEqual(round(result["gate_mean_current_gain"]["accepted_policy"], 4), 0.1900)
